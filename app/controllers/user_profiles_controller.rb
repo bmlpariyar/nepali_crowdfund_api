@@ -25,7 +25,7 @@ class UserProfilesController < ApplicationController
       :bio,
       :location,
       :website_url,
-      :profile_picture_url,
+      :profile_image,
       :date_of_birth
     )
   end
