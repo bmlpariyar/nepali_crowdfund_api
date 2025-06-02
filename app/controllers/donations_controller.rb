@@ -38,6 +38,51 @@ class DonationsController < ApplicationController
     render json: { error: "Could not process donation: #{e.message}" }, status: :internal_server_error
   end
 
+  def get_support_messages
+    @campaign = Campaign.find(params[:campaign_id])
+
+    @support_messages = @campaign.donations
+      .where.not(support_message: [nil, ""])
+      .includes(:user)
+      .map do |donation|
+      {
+        id: donation.id,
+        username: donation.is_anonymous ? "Anonymous" : donation.user&.full_name || donation.user&.email,
+        amount: donation.amount,
+        message: donation.support_message,
+        user_avater: donation.user&.user_profile&.profile_image&.attached? ? url_for(donation.user&.user_profile.profile_image) : "default_avatar_url",
+        created_at: donation.created_at,
+      }
+    end
+
+    render json: { support_messages: @support_messages }, status: :ok
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: "Campaign not found" }, status: :not_found
+  rescue => e
+    render json: { error: "Could not retrieve support messages: #{e.message}" }, status: :internal_server_error
+  end
+
+  def get_all_donations
+    @donations = @campaign.donations.order(created_at: :desc)
+    render json: @donations, each_serializer: DonationSerializer, status: :ok
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: "Campaign not found" }, status: :not_found
+  rescue => e
+    render json: { error: "Could not retrieve donations: #{e.message}" }, status: :internal_server_error
+  end
+
+  def get_top_donations
+    @top_donations = @campaign.donations
+      .where.not(amount: nil)
+      .order(amount: :desc)
+      .limit(10)
+    render json: @top_donations, each_serializer: DonationSerializer, status: :ok
+  rescue ActiveRecord::RecordNotFound
+    render json: { error: "Campaign not found" }, status: :not_found
+  rescue => e
+    render json: { error: "Could not retrieve top donations: #{e.message}" }, status: :internal_server_error
+  end
+
   private
 
   def set_campaign
@@ -48,6 +93,6 @@ class DonationsController < ApplicationController
   end
 
   def donation_params
-    params.require(:donation).permit(:amount, :is_anonymous)
+    params.require(:donation).permit(:amount, :is_anonymous, :support_message)
   end
 end

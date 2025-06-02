@@ -16,4 +16,11 @@ Rails.application.routes.draw do
   post "/login", to: "sessions#create"
   get "/me", to: "users#profile"
   post "/create_user", to: "users#create", as: :create_user
+
+  get "/campaigns/:campaign_id/support_messages", to: "donations#get_support_messages", as: :get_support_messages
+  post "/campaigns/:campaign_id/update_messages", to: "update_messages#create", as: :create_update_message
+  get "/campaigns/:campaign_id/get_update_messages", to: "update_messages#get_update_messages", as: :get_update_messages
+
+  get "/campaigns/:campaign_id/all_donations", to: "donations#get_all_donations", as: :get_all_donations
+  get "/campaigns/:campaign_id/top_donations", to: "donations#get_top_donations", as: :get_top_donations
 end

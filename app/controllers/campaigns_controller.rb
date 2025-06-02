@@ -47,7 +47,7 @@ class CampaignsController < ApplicationController
   end
 
   def campaign_params
-    params.require(:campaign).permit(:title, :story, :funding_goal, :deadline, :category_id, :image_url, :video_url)
+    params.require(:campaign).permit(:title, :story, :funding_goal, :deadline, :category_id, :cover_image, :video_url)
   end
 
   def check_ownership

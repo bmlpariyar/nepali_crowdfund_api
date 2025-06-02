@@ -2,6 +2,8 @@ class Campaign < ApplicationRecord
   belongs_to :user
   belongs_to :category
   has_many :donations, dependent: :destroy
+  has_one_attached :cover_image
+  has_many :update_messages, dependent: :destroy
 
   validates :user, presence: true
   validates :category, presence: true

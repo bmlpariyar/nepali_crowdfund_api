@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_05_28_113622) do
+ActiveRecord::Schema[7.2].define(version: 2025_05_31_150633) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -79,8 +79,20 @@ ActiveRecord::Schema[7.2].define(version: 2025_05_28_113622) do
     t.string "payment_gateway_transaction_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "support_message"
     t.index ["campaign_id"], name: "index_donations_on_campaign_id"
     t.index ["user_id"], name: "index_donations_on_user_id"
+  end
+
+  create_table "update_messages", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "campaign_id", null: false
+    t.text "message"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "title"
+    t.index ["campaign_id"], name: "index_update_messages_on_campaign_id"
+    t.index ["user_id"], name: "index_update_messages_on_user_id"
   end
 
   create_table "user_profiles", force: :cascade do |t|
@@ -110,5 +122,7 @@ ActiveRecord::Schema[7.2].define(version: 2025_05_28_113622) do
   add_foreign_key "campaigns", "users"
   add_foreign_key "donations", "campaigns"
   add_foreign_key "donations", "users"
+  add_foreign_key "update_messages", "campaigns"
+  add_foreign_key "update_messages", "users"
   add_foreign_key "user_profiles", "users"
 end
