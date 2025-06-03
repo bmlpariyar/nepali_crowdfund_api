@@ -23,4 +23,5 @@ Rails.application.routes.draw do
 
   get "/campaigns/:campaign_id/all_donations", to: "donations#get_all_donations", as: :get_all_donations
   get "/campaigns/:campaign_id/top_donations", to: "donations#get_top_donations", as: :get_top_donations
+  get "/campaigns/:campaign_id/donation_highlight", to: "donations#donation_highlight", as: :donation_highlight
 end
