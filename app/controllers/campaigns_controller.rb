@@ -9,7 +9,8 @@ class CampaignsController < ApplicationController
   end
 
   def show
-    render json: CampaignSerializer.new(@campaign).as_json, status: :ok
+    @campaign = Campaign.includes(user: :user_profile).find(params[:id])
+    render json: @campaign, serializer: CampaignSerializer
   end
 
   def create

@@ -1,5 +1,5 @@
 class UpdateMessagesController < ApplicationController
-  before_action :authorized
+  before_action :authorized, only: [:create]
   before_action :set_campaign
 
   def create
