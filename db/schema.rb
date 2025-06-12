@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_05_31_150633) do
+ActiveRecord::Schema[7.2].define(version: 2025_06_08_143417) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -42,6 +42,16 @@ ActiveRecord::Schema[7.2].define(version: 2025_05_31_150633) do
     t.index ["blob_id", "variation_digest"], name: "index_active_storage_variant_records_uniqueness", unique: true
   end
 
+  create_table "campaign_views", force: :cascade do |t|
+    t.bigint "user_id", null: false
+    t.bigint "campaign_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["campaign_id", "user_id"], name: "index_campaign_views_on_campaign_id_and_user_id", unique: true
+    t.index ["campaign_id"], name: "index_campaign_views_on_campaign_id"
+    t.index ["user_id"], name: "index_campaign_views_on_user_id"
+  end
+
   create_table "campaigns", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "category_id", null: false
@@ -56,6 +66,9 @@ ActiveRecord::Schema[7.2].define(version: 2025_05_31_150633) do
     t.string "video_url"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "address"
+    t.float "latitude"
+    t.float "longitude"
     t.index ["category_id"], name: "index_campaigns_on_category_id"
     t.index ["user_id"], name: "index_campaigns_on_user_id"
   end
@@ -103,6 +116,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_05_31_150633) do
     t.bigint "user_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.float "latitude"
+    t.float "longitude"
     t.index ["user_id"], name: "index_user_profiles_on_user_id"
   end
 
@@ -118,6 +133,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_05_31_150633) do
 
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
+  add_foreign_key "campaign_views", "campaigns"
+  add_foreign_key "campaign_views", "users"
   add_foreign_key "campaigns", "categories"
   add_foreign_key "campaigns", "users"
   add_foreign_key "donations", "campaigns"

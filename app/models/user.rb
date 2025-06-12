@@ -3,6 +3,7 @@ class User < ApplicationRecord
   has_many :donations, dependent: :nullify
   has_one :user_profile, dependent: :destroy
   has_many :update_messages, dependent: :destroy
+  has_many :campaign_views, dependent: :destroy
   has_secure_password
 
   validates :full_name, presence: true

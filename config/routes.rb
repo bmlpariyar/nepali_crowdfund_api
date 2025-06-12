@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  get "recommendations/index"
+  get "campaign_views/create"
   get "donations/create"
   get "sessions/create"
   get "users/create"
@@ -8,9 +10,11 @@ Rails.application.routes.draw do
   resources :users, only: [:create]
   resources :campaigns, only: [:index, :show, :create, :update, :destroy] do
     resources :donations, only: [:create]
+    post "view", to: "campaign_views#create"
   end
   resources :categories, only: [:index]
   resource :profile, only: [:show, :update], controller: :user_profiles
+  resource :recommendations, only: [:index], controller: :recommendations
 
   #--auth Routes
   post "/login", to: "sessions#create"
@@ -24,4 +28,7 @@ Rails.application.routes.draw do
   get "/campaigns/:campaign_id/all_donations", to: "donations#get_all_donations", as: :get_all_donations
   get "/campaigns/:campaign_id/top_donations", to: "donations#get_top_donations", as: :get_top_donations
   get "/campaigns/:campaign_id/donation_highlight", to: "donations#donation_highlight", as: :donation_highlight
+  get "/search", to: "campaigns#search", as: :search
+
+  get "/featured_campaigns", to: "campaigns#featured_campaigns", as: :featured_campaigns
 end

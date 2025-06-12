@@ -1,7 +1,7 @@
 class CampaignSerializer < ActiveModel::Serializer
   include Rails.application.routes.url_helpers
 
-  attributes :id, :user, :category, :title, :story, :funding_goal, :current_amount, :deadline, :status, :cover_image_url, :video_url, :total_donations, :created_at, :updated_at, :user_profile
+  attributes :id, :user, :category, :title, :story, :funding_goal, :current_amount, :deadline, :status, :cover_image_url, :video_url, :latitude, :longitude, :total_donations, :created_at, :updated_at, :user_profile
 
   belongs_to :user, serializer: UserSerializer
 

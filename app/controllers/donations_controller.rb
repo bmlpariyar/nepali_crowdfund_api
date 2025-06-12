@@ -12,6 +12,11 @@ class DonationsController < ApplicationController
       render json: { error: "This campaign has passed its deadline and can no longer accept donations." }, status: :forbidden
       return
     end
+
+    unless params[:donation][:amount].present? && (params[:donation][:amount].to_f > 0 && params[:donation][:amount].to_f <= 100000)
+      render json: { error: "Donation amount cannot exceed Rs 100,000 at a time" }, status: :unprocessable_entity
+      return
+    end
     @donation = @campaign.donations.build(donation_params)
     @donation.user = @current_user
     @donation.status = "Completed"

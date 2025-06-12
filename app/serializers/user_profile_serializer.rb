@@ -2,7 +2,7 @@ class UserProfileSerializer < ActiveModel::Serializer
   include Rails.application.routes.url_helpers
 
   attributes :id, :bio, :location, :website_url, :profile_picture_url,
-             :date_of_birth, :created_at, :updated_at, :user_id
+             :date_of_birth, :created_at, :updated_at, :user_id, :latitude, :longitude
 
   belongs_to :user
 

@@ -4,6 +4,8 @@ class Campaign < ApplicationRecord
   has_many :donations, dependent: :destroy
   has_one_attached :cover_image
   has_many :update_messages, dependent: :destroy
+  has_many :campaign_views, dependent: :destroy
+  geocoded_by :address
 
   validates :user, presence: true
   validates :category, presence: true
@@ -16,6 +18,17 @@ class Campaign < ApplicationRecord
   validates :slug, presence: true, uniqueness: true
 
   before_validation :generate_slug, on: [:create, :update]
+  after_validation :geocode, if: ->(obj) { obj.address.present? and obj.address_changed? }
+
+  scope :fully_funded_completed, -> {
+          where(status: "funded").where("current_amount >= funding_goal")
+        }
+
+  scope :high_potential_ongoing, -> {
+          where(status: "active").where("current_amount >= funding_goal * 0.80")
+        }
+
+  scope :active, -> { where(status: "active") }
 
   def generate_slug
     self.slug = title.parameterize

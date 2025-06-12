@@ -1,5 +1,5 @@
 class Category < ApplicationRecord
-  has_many :campaigns
+  has_many :campaigns, dependent: :destroy
   validates :name, uniqueness: true, presence: true
   validates :slug, uniqueness: true, presence: true
 
