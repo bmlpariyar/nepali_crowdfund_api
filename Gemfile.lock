@@ -107,6 +107,10 @@ GEM
       csv (>= 3.0.0)
     globalid (1.2.1)
       activesupport (>= 6.1)
+    httparty (0.23.1)
+      csv
+      mini_mime (>= 1.0.0)
+      multi_xml (>= 0.5.2)
     i18n (1.14.6)
       concurrent-ruby (~> 1.0)
     io-console (0.8.0)
@@ -143,6 +147,8 @@ GEM
     mini_mime (1.1.5)
     minitest (5.25.4)
     msgpack (1.7.5)
+    multi_xml (0.7.2)
+      bigdecimal (~> 3.1)
     net-imap (0.5.5)
       date
       net-protocol
@@ -269,6 +275,7 @@ DEPENDENCIES
   debug
   faker
   geocoder
+  httparty
   jwt (~> 2.7)
   kaminari
   pg (~> 1.1)

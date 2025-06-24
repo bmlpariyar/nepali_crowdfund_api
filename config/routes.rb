@@ -1,4 +1,5 @@
 Rails.application.routes.draw do
+  get "ai_assistant/analyze"
   get "recommendations/index"
   get "campaign_views/create"
   get "donations/create"
@@ -12,6 +13,24 @@ Rails.application.routes.draw do
     resources :donations, only: [:create]
     post "view", to: "campaign_views#create"
   end
+
+  namespace :admin do
+    get "users/index"
+    get "users/show"
+    get "users/update"
+    resources :users, only: [:index, :show, :update]
+  end
+
+  namespace :api do
+    namespace :v1 do
+      namespace :dashboard do
+        get "user_count_details", to: "dashboard_api#user_count_details"
+        get "get_weekly_campaign_activities", to: "dashboard_api#get_weekly_campaign_activities"
+        get "get_category_campaign_details", to: "dashboard_api#get_category_campaign_details"
+      end
+    end
+  end
+
   resources :categories, only: [:index]
   resource :profile, only: [:show, :update], controller: :user_profiles
   resource :recommendations, only: [:index], controller: :recommendations
@@ -31,4 +50,5 @@ Rails.application.routes.draw do
   get "/search", to: "campaigns#search", as: :search
 
   get "/featured_campaigns", to: "campaigns#featured_campaigns", as: :featured_campaigns
+  post "ai_assistant/analyze", to: "ai_assistant#analyze"
 end

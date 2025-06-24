@@ -35,4 +35,10 @@ class ApplicationController < ActionController::API
   def authorized
     render json: { message: "Please log in" }, status: :unauthorized unless logged_in?
   end
+
+  def require_admin
+    unless logged_in_user&.is_admin?
+      render json: { error: "Not authorized", message: "You are not authorized to perform this action" }, status: :forbidden
+    end
+  end
 end
