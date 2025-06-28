@@ -7,6 +7,8 @@ class Campaign < ApplicationRecord
   has_many :campaign_views, dependent: :destroy
   geocoded_by :address
 
+  has_many :chat_messages, dependent: :destroy
+
   validates :user, presence: true
   validates :category, presence: true
   validates :title, presence: true
@@ -32,5 +34,19 @@ class Campaign < ApplicationRecord
 
   def generate_slug
     self.slug = title.parameterize
+  end
+
+  def unread_chat_messages_for_creator
+    chat_messages.where(sender_type: "donor", read: false)
+  end
+
+  def unread_chat_messages_for_donors
+    chat_messages.where(sender_type: "creator", read: false)
+  end
+
+  def chat_participants
+    User.joins(:chat_messages)
+        .where(chat_messages: { campaign_id: id })
+        .distinct
   end
 end

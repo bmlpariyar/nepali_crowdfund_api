@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_06_21_035013) do
+ActiveRecord::Schema[7.2].define(version: 2025_06_27_093053) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -83,6 +83,22 @@ ActiveRecord::Schema[7.2].define(version: 2025_06_21_035013) do
     t.index ["slug"], name: "index_categories_on_slug", unique: true
   end
 
+  create_table "chat_messages", force: :cascade do |t|
+    t.bigint "campaign_id", null: false
+    t.bigint "user_id", null: false
+    t.text "message", null: false
+    t.string "sender_type", null: false
+    t.boolean "read", default: false
+    t.datetime "read_at"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["campaign_id", "created_at"], name: "index_chat_messages_on_campaign_id_and_created_at"
+    t.index ["campaign_id", "read"], name: "index_chat_messages_on_campaign_id_and_read"
+    t.index ["campaign_id"], name: "index_chat_messages_on_campaign_id"
+    t.index ["user_id", "created_at"], name: "index_chat_messages_on_user_id_and_created_at"
+    t.index ["user_id"], name: "index_chat_messages_on_user_id"
+  end
+
   create_table "donations", force: :cascade do |t|
     t.bigint "user_id", null: false
     t.bigint "campaign_id", null: false
@@ -138,6 +154,8 @@ ActiveRecord::Schema[7.2].define(version: 2025_06_21_035013) do
   add_foreign_key "campaign_views", "users"
   add_foreign_key "campaigns", "categories"
   add_foreign_key "campaigns", "users"
+  add_foreign_key "chat_messages", "campaigns"
+  add_foreign_key "chat_messages", "users"
   add_foreign_key "donations", "campaigns"
   add_foreign_key "donations", "users"
   add_foreign_key "update_messages", "campaigns"

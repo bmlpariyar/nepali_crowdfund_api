@@ -17,6 +17,10 @@ gem "byebug"
 gem "geocoder"
 gem "faker"
 gem "httparty"
+gem "dotenv-rails"
+# In your Gemfile
+gem "sendgrid-ruby"
+
 #========================================================================================
 group :development, :test do
   gem "debug", platforms: %i[ mri windows ], require: "debug/prelude"

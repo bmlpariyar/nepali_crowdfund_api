@@ -57,4 +57,9 @@ class Api::V1::Dashboard::DashboardApiController < ApplicationController
 
     render json: category_details, status: :ok
   end
+
+  def get_recent_campaigns
+    recent_campaigns = Campaign.order(created_at: :desc).limit(5)
+    render json: recent_campaigns, each_serializer: CampaignSerializer, status: :ok
+  end
 end

@@ -23,10 +23,22 @@ Rails.application.routes.draw do
 
   namespace :api do
     namespace :v1 do
+
+      # Dashboard routes
       namespace :dashboard do
         get "user_count_details", to: "dashboard_api#user_count_details"
         get "get_weekly_campaign_activities", to: "dashboard_api#get_weekly_campaign_activities"
         get "get_category_campaign_details", to: "dashboard_api#get_category_campaign_details"
+      end
+
+      # ChatMessages nested under Campaigns
+      resources :campaigns do
+        resources :chat_messages, only: [:index, :create] do
+          collection do
+            post :mark_as_read
+            get :unread_count
+          end
+        end
       end
     end
   end
