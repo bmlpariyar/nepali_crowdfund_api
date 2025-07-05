@@ -1,6 +1,6 @@
 class CampaignsController < ApplicationController
   skip_before_action :authorized, only: [:index, :show, :search, :featured_campaigns]
-  before_action :set_campaign, only: [:show, :update, :destroy]
+  before_action :set_campaign, only: [:show, :update, :destroy, :estimate_completion_date]
   before_action :check_ownership, only: [:update, :destroy]
 
   def index
@@ -138,6 +138,44 @@ class CampaignsController < ApplicationController
     else
       render json: { message: "No featured success stories found." }, status: :ok
     end
+  end
+
+  def estimate_completion_date
+    if @campaign.nil?
+      return render json: { message: "Campaign not found" }, status: :not_found
+    end
+
+    donations = @campaign.donations.order(:created_at)
+
+    if donations.empty?
+      return render json: { message: "Not enough data to estimate completion date" }, status: :unprocessable_entity
+    end
+
+    total_donated = donations.sum(:amount)
+    first_date = donations.first.created_at.to_date
+    today = Date.today
+
+    days_since_first = (today - first_date).to_i
+    if days_since_first.zero?
+      return render json: { message: "Insufficient donation duration" }, status: :unprocessable_entity
+    end
+
+    average_daily_donation = total_donated.to_f / days_since_first
+    remaining_amount = @campaign.funding_goal - total_donated
+
+    if average_daily_donation <= 0
+      return render json: { message: "Average daily donation is zero" }, status: :unprocessable_entity
+    end
+
+    estimated_days_remaining = (remaining_amount / average_daily_donation).ceil
+    estimated_completion_date = today + estimated_days_remaining
+
+    render json: {
+      estimated_completion_date: estimated_completion_date,
+      days_remaining: estimated_days_remaining,
+      average_daily_donation: average_daily_donation.round(2),
+      remaining_amount: remaining_amount,
+    }
   end
 
   private

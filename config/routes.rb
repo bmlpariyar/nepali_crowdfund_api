@@ -63,4 +63,6 @@ Rails.application.routes.draw do
 
   get "/featured_campaigns", to: "campaigns#featured_campaigns", as: :featured_campaigns
   post "ai_assistant/analyze", to: "ai_assistant#analyze"
+
+  get "/campaigns/:id/estimate_completion_date", to: "campaigns#estimate_completion_date", as: :estimate_completion_date
 end
