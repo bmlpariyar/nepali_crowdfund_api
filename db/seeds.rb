@@ -4,6 +4,18 @@ ActiveRecord::Base.transaction do
   puts "Clearing old records..."
   Campaign.destroy_all
   Category.destroy_all
+  User.destroy_all
+
+  puts "Seeding users..."
+  User.create!(
+    full_name: "Bimal Thapa",
+    email: "bimal@gmail.com",
+    password: "bimal123",
+    password_confirmation: "bimal123",
+    is_admin: true,
+    created_at: Time.current,
+    updated_at: Time.current,
+  )
 
   puts "Seeding categories..."
   CATEGORY_DATA = [
