@@ -17,11 +17,9 @@ class RecommendationService
     recommendations += funding_goal_based_recommendations
     recommendations += trending_recommendations
 
-    # Remove duplicates and apply final filtering
     final_recommendations = recommendations.uniq
     apply_business_rules(final_recommendations)
 
-    # Score and sort recommendations
     scored_recommendations = score_recommendations(final_recommendations)
     scored_recommendations.first(TOTAL_LIMIT)
   end
@@ -63,7 +61,6 @@ class RecommendationService
   end
 
   def trending_recommendations
-    # Campaigns with high recent activity
     Campaign.active
             .joins(:donations)
             .where(donations: { created_at: 1.week.ago.. })
@@ -83,16 +80,13 @@ class RecommendationService
   end
 
   def user_preferred_funding_ranges
-    # Analyze user's donation behavior to determine preferred funding ranges
     donation_amounts = @user.donations.pluck(:amount)
     return default_funding_ranges if donation_amounts.empty?
 
     avg_donation = donation_amounts.sum / donation_amounts.count
 
-    # Create ranges based on user's donation behavior
     ranges = []
 
-    # Small campaigns (user might prefer supporting smaller causes)
     if avg_donation <= 50
       ranges << (0..1000)
       ranges << (1000..5000)
@@ -108,7 +102,6 @@ class RecommendationService
   end
 
   def default_funding_ranges
-    # Default ranges for new users
     [
       (0..5000),
       (5000..25000),
@@ -126,34 +119,32 @@ class RecommendationService
   def calculate_campaign_score(campaign)
     score = 0
 
-    # Location score (higher for closer campaigns)
     if location_available? && campaign.latitude && campaign.longitude
       distance = Geocoder::Calculations.distance_between(
         [@profile.latitude, @profile.longitude],
         [campaign.latitude, campaign.longitude]
       )
-      score += [50 - distance, 0].max # Max 50 points for location
+      score += [50 - distance, 0].max
     end
 
     # Category preference score
     if user_preferred_categories.include?(campaign.category_id)
       category_rank = user_preferred_categories.index(campaign.category_id) + 1
-      score += (10 - category_rank) * 5 # More points for higher preferred categories
+      score += (10 - category_rank) * 5
     end
 
     # Funding goal alignment score
     user_preferred_funding_ranges.each_with_index do |range, index|
       if range.include?(campaign.funding_goal)
-        score += (3 - index) * 10 # More points for higher preferred ranges
+        score += (3 - index) * 10
         break
       end
     end
 
     # Recency score
     days_old = (Date.current - campaign.created_at.to_date).to_i
-    score += [30 - days_old, 0].max # Newer campaigns get more points
+    score += [30 - days_old, 0].max
 
-    # Progress score (campaigns with some progress but not fully funded)
     progress_percentage = (campaign.current_amount / campaign.funding_goal.to_f) * 100
     if progress_percentage.between?(10, 80)
       score += 20
@@ -165,19 +156,15 @@ class RecommendationService
   end
 
   def apply_business_rules(campaigns)
-    # Remove campaigns user has already donated to
     donated_campaign_ids = @user.donations.pluck(:campaign_id).uniq
     campaigns.reject! { |campaign| donated_campaign_ids.include?(campaign.id) }
 
-    # Remove user's own campaigns
     campaigns.reject! { |campaign| campaign.user_id == @user.id }
 
-    # Remove fully funded campaigns (optional)
     campaigns.reject! { |campaign| campaign.current_amount >= campaign.funding_goal }
   end
 
   def excluded_campaign_ids
-    # Campaigns to exclude from all recommendations
     ids = []
     ids += @user.donations.pluck(:campaign_id)
     ids += @user.campaigns.pluck(:id)
