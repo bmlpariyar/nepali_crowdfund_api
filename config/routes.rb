@@ -60,6 +60,7 @@ Rails.application.routes.draw do
   get "/campaigns/:campaign_id/top_donations", to: "donations#get_top_donations", as: :get_top_donations
   get "/campaigns/:campaign_id/donation_highlight", to: "donations#donation_highlight", as: :donation_highlight
   get "/search", to: "campaigns#search", as: :search
+  post "/payments/khalti", to: "donations#khalti_payment", as: :khalti_payment
 
   get "/featured_campaigns", to: "campaigns#featured_campaigns", as: :featured_campaigns
   post "ai_assistant/analyze", to: "ai_assistant#analyze"

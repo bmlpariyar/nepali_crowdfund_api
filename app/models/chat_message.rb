@@ -1,6 +1,7 @@
 class ChatMessage < ApplicationRecord
   belongs_to :campaign
   belongs_to :user
+  belongs_to :conversation
 
   validates :message, presence: true, length: { maximum: 1000 }
   validates :sender_type, inclusion: { in: %w[creator donor] }

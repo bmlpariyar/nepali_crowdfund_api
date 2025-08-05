@@ -1,6 +1,7 @@
 class DonationsController < ApplicationController
   before_action :authorized, only: [:create]
   before_action :set_campaign
+  skip_before_action :set_campaign, only: [:khalti_payment]
 
   def create
     unless @campaign.status == "active"
@@ -109,6 +110,77 @@ class DonationsController < ApplicationController
     render json: { error: "Campaign not found" }, status: :not_found
   rescue => e
     render json: { error: "Could not retrieve donation highlights: #{e.message}" }, status: :internal_server_error
+  end
+
+  def khalti_payment
+    begin
+      # Extract data from request parameters
+      payment_params = params.require(:payment).permit(
+        :return_url, :website_url, :amount, :purchase_order_id, :purchase_order_name,
+        :merchant_username, :merchant_extra,
+        customer_info: [:name, :email, :phone],
+        amount_breakdown: [:label, :amount],
+        product_details: [:identity, :name, :total_price, :quantity, :unit_price],
+      )
+
+      # Validate required fields
+      unless payment_params[:amount].present? && payment_params[:purchase_order_id].present?
+        return render json: {
+                        error: true,
+                        message: "Amount and purchase order ID are required",
+                      }, status: :bad_request
+      end
+
+      # Validate amount
+      amount = payment_params[:amount].to_f
+      if amount <= 0
+        return render json: {
+                        error: true,
+                        message: "Amount must be greater than 0",
+                      }, status: :bad_request
+      end
+
+      # Create payment data hash
+      payment_data = {
+        return_url: payment_params[:return_url],
+        website_url: payment_params[:website_url],
+        amount: amount,
+        purchase_order_id: payment_params[:purchase_order_id],
+        purchase_order_name: payment_params[:purchase_order_name],
+        customer_info: payment_params[:customer_info],
+        amount_breakdown: [payment_params[:amount_breakdown]].compact,
+        product_details: [payment_params[:product_details]].compact,
+        merchant_username: payment_params[:merchant_username],
+        merchant_extra: payment_params[:merchant_extra],
+      }
+
+      # Initiate payment
+      service = KhaltiPaymentService.new(payment_data)
+      response = service.initiate_payment
+
+      if response[:error]
+        render json: response, status: :unprocessable_entity
+      else
+        render json: response
+      end
+    rescue ActionController::ParameterMissing => e
+      render json: {
+        error: true,
+        message: "Missing required parameters: #{e.message}",
+      }, status: :bad_request
+    rescue StandardError => e
+      Rails.logger.error "Khalti payment error: #{e.message}"
+      render json: {
+        error: true,
+        message: "An error occurred while processing payment",
+      }, status: :internal_server_error
+    end
+  end
+
+  def payment_return
+    # Handle payment return from Khalti
+    # You can verify payment status here
+    redirect_to root_path, notice: "Payment processed"
   end
 
   private

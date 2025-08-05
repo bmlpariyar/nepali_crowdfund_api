@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2025_06_27_093053) do
+ActiveRecord::Schema[7.2].define(version: 2025_07_14_141740) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
@@ -92,11 +92,25 @@ ActiveRecord::Schema[7.2].define(version: 2025_06_27_093053) do
     t.datetime "read_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.bigint "conversation_id", null: false
     t.index ["campaign_id", "created_at"], name: "index_chat_messages_on_campaign_id_and_created_at"
     t.index ["campaign_id", "read"], name: "index_chat_messages_on_campaign_id_and_read"
     t.index ["campaign_id"], name: "index_chat_messages_on_campaign_id"
+    t.index ["conversation_id"], name: "index_chat_messages_on_conversation_id"
     t.index ["user_id", "created_at"], name: "index_chat_messages_on_user_id_and_created_at"
     t.index ["user_id"], name: "index_chat_messages_on_user_id"
+  end
+
+  create_table "conversations", force: :cascade do |t|
+    t.bigint "campaign_id", null: false
+    t.bigint "creator_id", null: false
+    t.bigint "donor_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["campaign_id", "creator_id", "donor_id"], name: "index_conversations_on_campaign_id_and_creator_id_and_donor_id", unique: true
+    t.index ["campaign_id"], name: "index_conversations_on_campaign_id"
+    t.index ["creator_id"], name: "index_conversations_on_creator_id"
+    t.index ["donor_id"], name: "index_conversations_on_donor_id"
   end
 
   create_table "donations", force: :cascade do |t|
@@ -155,7 +169,11 @@ ActiveRecord::Schema[7.2].define(version: 2025_06_27_093053) do
   add_foreign_key "campaigns", "categories"
   add_foreign_key "campaigns", "users"
   add_foreign_key "chat_messages", "campaigns"
+  add_foreign_key "chat_messages", "conversations"
   add_foreign_key "chat_messages", "users"
+  add_foreign_key "conversations", "campaigns"
+  add_foreign_key "conversations", "users", column: "creator_id"
+  add_foreign_key "conversations", "users", column: "donor_id"
   add_foreign_key "donations", "campaigns"
   add_foreign_key "donations", "users"
   add_foreign_key "update_messages", "campaigns"
