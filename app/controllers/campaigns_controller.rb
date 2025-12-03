@@ -142,13 +142,13 @@ class CampaignsController < ApplicationController
 
   def estimate_completion_date
     if @campaign.nil?
-      return render json: { message: "Campaign not found" }, status: :not_found
+      return render json: error_payload("Campaign not found"), status: :not_found
     end
 
     donations = @campaign.donations.order(:created_at)
 
     if donations.empty?
-      return render json: { message: "Not enough data to estimate completion date" }, status: :unprocessable_entity
+      return render json: error_payload("Not enough data to estimate completion date"), status: :ok
     end
 
     total_donated = donations.sum(:amount)
@@ -157,23 +157,35 @@ class CampaignsController < ApplicationController
 
     days_since_first = (today - first_date).to_i
     if days_since_first.zero?
-      return render json: { message: "Insufficient donation duration" }, status: :unprocessable_entity
+      return render json: error_payload("Insufficient donation duration"), status: :ok
     end
 
     average_daily_donation = total_donated.to_f / days_since_first
     remaining_amount = @campaign.funding_goal - total_donated
 
     if average_daily_donation <= 0
-      return render json: { message: "Average daily donation is zero" }, status: :unprocessable_entity
+      return render json: error_payload("Average daily donation is zero", remaining_amount), status: :ok
     end
 
     estimated_days_remaining = (remaining_amount / average_daily_donation).ceil
     estimated_completion_date = today + estimated_days_remaining
 
     render json: {
-      estimated_completion_date: estimated_completion_date,
-      days_remaining: estimated_days_remaining,
-      average_daily_donation: average_daily_donation.round(2),
+             estimated_completion_date: estimated_completion_date,
+             days_remaining: estimated_days_remaining,
+             average_daily_donation: average_daily_donation.round(2),
+             remaining_amount: remaining_amount,
+           }, status: :ok
+  end
+
+  private
+
+  def error_payload(message, remaining_amount = 0)
+    {
+      message: message,
+      estimated_completion_date: 0,
+      days_remaining: 0,
+      average_daily_donation: 0,
       remaining_amount: remaining_amount,
     }
   end
@@ -185,6 +197,16 @@ class CampaignsController < ApplicationController
     unless @campaign
       render json: { message: "Campaign not found" }, status: :not_found
     end
+  end
+
+  def error_payload(message, remaining_amount = 0)
+    {
+      message: message,
+      estimated_completion_date: 0,
+      days_remaining: 0,
+      average_daily_donation: 0,
+      remaining_amount: remaining_amount,
+    }
   end
 
   def campaign_params
